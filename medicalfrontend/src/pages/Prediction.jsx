@@ -26,17 +26,24 @@ export default function Prediction() {
   const [modelReady, setModelReady] = useState(true);
 
   React.useEffect(() => {
-    checkModel();
-  }, []);
+    let isMounted = true;
 
-  const checkModel = async () => {
-    try {
-      const status = await getModelStatus();
-      setModelReady(status.model_loaded);
-    } catch (err) {
-      setModelReady(false);
-    }
-  };
+    const checkModel = async () => {
+      try {
+        const status = await getModelStatus();
+        if (isMounted) setModelReady(status.model_loaded);
+      } catch (err) {
+        if (!isMounted) return;
+        setModelReady(false);
+        setError(err.message || 'Could not check prediction model status.');
+      }
+    };
+
+    checkModel();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -72,7 +79,9 @@ export default function Prediction() {
       <div className="prediction-container">
         <div className="model-warning">
           <h2>Model Not Ready</h2>
-          <p>The prediction model needs to be trained first. Run: python train_model.py</p>
+          <p role={error ? 'alert' : undefined}>
+            {error || 'The prediction model needs to be trained first. Run: python train_model.py'}
+          </p>
         </div>
       </div>
     );

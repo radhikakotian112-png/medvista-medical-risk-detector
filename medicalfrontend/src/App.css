@@ -2075,3 +2075,221 @@ body { background: var(--app-background); color: var(--text-primary); }
     width: 100%;
   }
 }
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+.app {
+  width: 100%;
+  min-width: 0;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.sidebar {
+  flex: 0 0 250px;
+  width: 250px;
+  min-width: 250px;
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main > .navbar {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.page-content {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    flex: 0 0 80px;
+    width: 80px;
+    min-width: 80px;
+    padding: 20px 10px;
+  }
+
+  .main {
+    width: 0;
+  }
+
+  .page-content {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    z-index: 1000;
+    inset: auto 0 0;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    padding: 6px 5px calc(6px + env(safe-area-inset-bottom));
+    overflow: hidden;
+    background: linear-gradient(160deg, #082f3b 0%, #064b54 55%, #07343f 100%);
+    box-shadow: 0 -6px 22px rgba(0, 48, 54, 0.2);
+  }
+
+  .sidebar::before,
+  .sidebar::after,
+  .sidebar .logo {
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .sidebar-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-menu .menu-btn {
+    flex: 0 0 62px;
+    width: 62px;
+    min-width: 62px;
+    min-height: 54px;
+    height: 54px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 3px 2px;
+    overflow: hidden;
+    border-radius: 7px;
+    font-size: 10px;
+  }
+
+  .sidebar-menu .menu-btn > span:last-child {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 9px;
+    line-height: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar-menu .menu-icon {
+    width: 27px;
+    min-width: 27px;
+    height: 27px;
+    border: 0;
+    background: transparent;
+    font-size: 16px;
+  }
+
+  .main {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .main > .navbar {
+    min-height: 72px;
+    padding: 8px 13px;
+  }
+
+  .navbar-brand,
+  .brand-text {
+    min-width: 0;
+  }
+
+  .brand-text h2 {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .brand-text p {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .page-content {
+    padding: 16px 12px calc(78px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+
+  .form-container {
+    padding: 16px 8px;
+  }
+
+  .form-container h1 {
+    font-size: 25px;
+    overflow-wrap: anywhere;
+  }
+
+  .assessment-section .form-section-title {
+    padding: 13px 14px;
+  }
+
+  .assessment-section .form-grid,
+  .assessment-section .evidence-grid {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .dashboard-panel,
+  .patient-history-page .card {
+    padding: 16px 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .main > .navbar {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .brand-text h2 {
+    font-size: 12px;
+  }
+
+  .brand-text p {
+    font-size: 8px;
+  }
+
+  .sidebar-menu .menu-btn {
+    flex-basis: 58px;
+    width: 58px;
+    min-width: 58px;
+  }
+}

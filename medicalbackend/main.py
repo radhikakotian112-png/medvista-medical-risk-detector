@@ -42,7 +42,8 @@ ALLOWED_ORIGINS = [
     origin.strip().rstrip("/")
     for origin in os.getenv(
         "ALLOWED_ORIGINS",
-"http://localhost:5173,http://127.0.0.1:5173,https://medical-misdiagnosis-risk-detector-seven.vercel.app",    ).split(",")
+        "http://localhost:5173,http://127.0.0.1:5173,https://medical-misdiagnosis-risk-detector-seven.vercel.app",
+    ).split(",")
     if origin.strip()
 ]
 

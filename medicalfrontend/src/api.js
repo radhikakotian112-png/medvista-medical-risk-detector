@@ -23,6 +23,7 @@ async function request(path, options = {}) {
   if (response.status === 401) {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("loggedIn");
+    localStorage.removeItem("user");
   }
   return response;
 }
@@ -38,6 +39,20 @@ export async function register(email, password) {
   const response = await request("/api/auth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.detail || "Could not create account");
+  return data;
+}
+
+export async function googleLogin(credential) {
+  const response = await request("/api/auth/google", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ credential }) });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.detail || "Google sign-in failed");
+  return data;
+}
+
+export async function getAdminOverview() {
+  const response = await request("/api/admin/overview");
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.detail || "Could not load admin overview");
   return data;
 }
 

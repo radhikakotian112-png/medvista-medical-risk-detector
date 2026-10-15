@@ -5,11 +5,12 @@ import {
   FaBell,
   FaCog,
   FaAddressBook,
+  FaUserShield,
 } from "react-icons/fa";
 import { FaClockRotateLeft } from "react-icons/fa6";
 import { MdAssessment } from "react-icons/md";
 
-function Sidebar({ t }) {
+function Sidebar({ t, isAdmin }) {
   return (
     <aside className="sidebar">
 
@@ -84,6 +85,15 @@ function Sidebar({ t }) {
           </span>
           <span>{t.contact}</span>
         </NavLink>
+
+        {isAdmin && (
+          <NavLink to="/admin" className="menu-btn">
+            <span className="menu-icon">
+              <FaUserShield />
+            </span>
+            <span>Admin panel</span>
+          </NavLink>
+        )}
 
       </nav>
 

@@ -12,6 +12,7 @@ import Alert from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Contact from "./pages/Contact";
+import Admin from "./pages/Admin";
 import Home from "./pages/home";
 import { getTranslations } from "./translations";
 
@@ -37,10 +38,24 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
+function getCurrentUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function AdminRoute({ children }) {
+  const isAdmin = getCurrentUser()?.role === "admin";
+  return isAdmin ? <ProtectedRoute>{children}</ProtectedRoute> : <Navigate to="/dashboard" replace />;
+}
+
 function App() {
   const isAuthenticated = Boolean(localStorage.getItem("accessToken"));
   const [settings, setSettings] = useState(loadSettings);
   const translations = getTranslations(settings.language);
+  const user = getCurrentUser();
 
   const location = useLocation();
 
@@ -62,7 +77,7 @@ const showAppLayout =
 
   return (
     <div className="app">
-{showAppLayout && <Sidebar t={translations} />}
+{showAppLayout && <Sidebar t={translations} isAdmin={user?.role === "admin"} />}
       <div className="main">
     {showAppLayout && <Navbar t={translations} />}
 
@@ -85,8 +100,17 @@ const showAppLayout =
             />
 
             <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
+
+            <Route
               path="/patient"
-              elementf={
+              element={
                 <ProtectedRoute>
                   <PatientForm />
                 </ProtectedRoute>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity,
@@ -13,8 +13,17 @@ import {
   Stethoscope,
   Syringe,
 } from "lucide-react";
-import { login, register } from "../api";
+import { googleLogin, login, register } from "../api";
 import "./Login.css";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+function startSession(data, navigate) {
+  localStorage.setItem("accessToken", data.access_token);
+  localStorage.setItem("loggedIn", "true");
+  localStorage.setItem("user", JSON.stringify(data.user));
+  navigate("/dashboard");
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,47 +31,70 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const googleButtonRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || !googleButtonRef.current) return;
+
+    const handleGoogleCredential = async (credential) => {
+      setError("");
+      setLoading(true);
+      try {
+        startSession(await googleLogin(credential), navigate);
+      } catch (authError) {
+        setError(authError.message || "Google sign-in failed");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const renderGoogleButton = () => {
+      if (!window.google?.accounts?.id || !googleButtonRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => handleGoogleCredential(response.credential),
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        width: Math.floor(googleButtonRef.current.clientWidth),
+      });
+    };
+
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = renderGoogleButton;
+    script.onerror = () => setError("Google sign-in could not be loaded");
+    document.head.appendChild(script);
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      // Validate credentials
       if (!email || !password) {
         setError("Please enter email and password");
-        setLoading(false);
         return;
       }
 
-      try {
-        // Try to login via backend API
-        const data = isRegistering ? await register(email, password) : await login(email, password);
-        localStorage.setItem("accessToken", data.access_token);
-        localStorage.setItem("loggedIn", "true");
-        navigate("/dashboard");
-      } catch (apiError) {
-        // If backend is not available, use mock authentication
-        console.log("Backend not available, using mock authentication");
-        
-        // Mock credentials for demo
-        const validEmails = ["doctor@hospital.com", "doctor@example.com", "admin@hospital.com"];
-        if (validEmails.includes(email) && password.length >= 6) {
-          // Set mock authentication tokens
-          localStorage.setItem("accessToken", "mock-demo-token-" + Date.now());
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("user", JSON.stringify({
-            username: email.split("@")[0],
-            email: email,
-            role: "doctor",
-            token: "mock-demo-token"
-          }));
-          navigate("/dashboard");
-        } else {
-          setError("Demo credentials: doctor@hospital.com / password123");
-        }
-      }
+      startSession(isRegistering ? await register(email, password) : await login(email, password), navigate);
+    } catch (apiError) {
+      setError(apiError.message || "Could not authenticate. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -140,6 +172,13 @@ export default function Login() {
               {!loading && <ArrowRight size={18} aria-hidden="true" />}
             </button>
           </form>
+
+          <div className="login-divider"><span>or</span></div>
+          {GOOGLE_CLIENT_ID ? (
+            <div className="login-google-button" ref={googleButtonRef} />
+          ) : (
+            <p className="login-google-unavailable">Google sign-in needs VITE_GOOGLE_CLIENT_ID configured.</p>
+          )}
 
           <button className="login-mode-toggle" type="button" onClick={() => { setIsRegistering((value) => !value); setError(""); }}>
             {isRegistering ? "Already have an account? Sign in" : "New here? Create an account"}
